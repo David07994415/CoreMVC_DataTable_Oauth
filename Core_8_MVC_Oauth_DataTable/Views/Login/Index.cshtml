@@ -1,0 +1,37 @@
+﻿@{
+	Layout = "~/Views/shared/_layout.cshtml";
+}
+
+
+<h2>登入頁面</h2>
+<ul>
+	<li>1. 於 Google Console 建立 OAuth Credential</li>
+	<li>2. 於 Appsetting 新增 Credential ID 和 Credential Secret</li>
+	<li>3. 安裝 Nuget：Microsoft.AspNetCore.Authentication.Google</li>
+	<li>4. Program.cs 環境，設定相關 Authentication 環境</li>
+	<li>5. LoginController.cs：新增 Redirect 和 Callback Action</li>
+</ul>
+
+<form asp-action="Login" asp-controller="Login" method="post">
+
+	@Html.AntiForgeryToken()
+
+	<div>
+		<label for="Account">帳號：</label>
+		<input type="text" name="Account" placeholder="請填入帳號" />
+	</div>
+
+	<div>
+		<label for="Password">密碼：</label>
+		<input type="password" name="Password" placeholder="請填入密碼" />
+	</div>
+
+	<button type="submit">登入</button>
+
+</form>
+
+<div>
+<h3>第三方登入</h3>  
+	<a asp-action="OAuthSignIn" asp-controller="Login" asp-route-path="GoogleResponse">Google 登入</a>
+	<a asp-action="OAuthSignIn" asp-controller="Login" asp-route-path="LineResponse">Line 登入</a>
+</div>

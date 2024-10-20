@@ -1,0 +1,86 @@
+﻿@{
+	Layout = "~/Views/shared/_layout.cshtml";
+}
+
+
+<h2>Jquery DataTable Server Side Practice</h2>
+<ul>
+	<li>PreSetting： 先安裝 DataTable 的 CSS 和 JS CDN，要在有 Jquery 的環境下才能運作</li>
+	<li>1. 安裝 EF Core：Microsoft.EntityFrameworkCore.SqlServer / Microsoft.EntityFrameworkCore.Tools</li>
+	<li>2. 設定資料環境： "Scaffold-DbContext" / Program.cs / Appsettings</li>
+	<li>3. 撰寫 JS Script (如本頁面的 Section Scripts)</li>
+	<li>4. 建立 DataTableRequest.cs / DataTableRequest.cs 類別</li>
+	<li>5. 透過Ajax 傳送額外的 Input Data：調整 DataTableRequest.cs 類別 </li>
+</ul>
+<div>
+	<h3>This is a Table</h3>
+	<Table id="dataTable" class="border border-2 border-primary">
+		<thead>
+			<tr>
+				<th>編號</th>
+				<th>名稱</th>
+				<th>路由</th>
+				<th>時間</th>
+			</tr>
+		</thead>
+		<tbody>
+			@* <tr>
+				<td>1</td>
+				<td>David</td>
+				<td>10:00</td>
+			</tr>
+			<tr>
+				<td>2</td>
+				<td>Ema</td>
+				<td>12:00</td>
+			</tr> *@
+		</tbody>
+	</Table>
+
+</div>
+
+@section Scripts {
+	<script type="text/javascript">
+
+		let dataTableInstance = $('#dataTable').DataTable({
+			"processing": true,
+			"serverSide": true,
+			"searching": false,    // 關閉搜尋功能
+			"ordering": false,     // 關閉排序功能
+			"language": {
+				"info": "顯示第 _START_ 到 _END_ 筆資料，總共 _TOTAL_ 筆",  // 修改顯示文字
+				"infoFiltered":  "", // 數據量過大，可以傳送""    //   "(從 _MAX_ 筆資料中篩選)",  // 顯示過濾後的訊息
+				"infoEmpty": "顯示第 0 到 0 筆資料，總共 0 筆"
+			},
+			"ajax": {
+				"url": "/DataTable/GetTableData",
+				"type": "POST",
+				"data": function (d) {     // 要傳送給後端的物件
+					// 將自定義的 input 值附加到 AJAX 請求中
+					d.UserName = 'David' //$('#usernameFilter').val();  // 傳送 input 的值
+					d.UrlPath ='/Home' //$('#dateFilter').val();          // 傳送另一個 input 的值
+				},
+				"dataSrc": function (objFromBackend) {   // 後端傳送回來的物件
+					console.log('後端傳回的資料：',objFromBackend);  // 在這裡可以查看伺服器返回的資料
+					return objFromBackend.data;  // 返回實際要顯示在表格中的數據
+				}
+			},
+			"columns": [
+				{ "data": "id" },
+				{ "data": "userName" },
+				{ "data": "urlPath" },
+				{ "data": "logTime" }
+			]
+		});
+
+		// 使用 xhr 事件來捕獲 DataTables 發送的 AJAX 請求數據
+		dataTableInstance.on('xhr.dt', function (e, settings, json, xhr) {
+			console.log("DataTables 發送的物件: ", settings);   // DataTable 所傳送的參數物件可以看：settings.oAjaxData
+			console.log("後端傳送回來的物件: ", json);
+		});
+
+		
+	</script>
+	
+
+}

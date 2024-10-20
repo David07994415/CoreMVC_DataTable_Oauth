@@ -1,0 +1,6 @@
+/.vs
+/Core_8_MVC_Oauth_DataTable/appsettings.json
+/Core_8_MVC_Oauth_DataTable/bin
+/Core_8_MVC_Oauth_DataTable/obj
+*.user
+

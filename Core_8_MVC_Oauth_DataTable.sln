@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core_8_MVC_Oauth_DataTable", "Core_8_MVC_Oauth_DataTable\Core_8_MVC_Oauth_DataTable.csproj", "{D91E87CA-204A-47E9-8505-708B2B5B5C03}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D91E87CA-204A-47E9-8505-708B2B5B5C03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D91E87CA-204A-47E9-8505-708B2B5B5C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D91E87CA-204A-47E9-8505-708B2B5B5C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D91E87CA-204A-47E9-8505-708B2B5B5C03}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B853B69-3C76-46E4-84E0-DD0E064ECD23}
+	EndGlobalSection
+EndGlobal
