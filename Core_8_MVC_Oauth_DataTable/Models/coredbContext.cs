@@ -11,6 +11,12 @@ public partial class coredbContext : DbContext
     {
     }
 
+    public virtual DbSet<Logger> Logger { get; set; }
+
+    public virtual DbSet<MemberShip> MemberShip { get; set; }
+
+    public virtual DbSet<OAuthTable> OAuthTable { get; set; }
+
     public virtual DbSet<Orders> Orders { get; set; }
 
     public virtual DbSet<customer> customer { get; set; }
@@ -19,10 +25,18 @@ public partial class coredbContext : DbContext
 
     public virtual DbSet<product> product { get; set; }
 
-	public virtual DbSet<Logger> logger { get; set; }
-
-	protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Logger>(entity =>
+        {
+            entity.Property(e => e.LogTime).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<OAuthTable>(entity =>
+        {
+            entity.Property(e => e.CreateDate).HasDefaultValueSql("(getdate())");
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

@@ -12,4 +12,20 @@ namespace Core_8_MVC_Oauth_DataTable.Dtos
 		[Display(Name = "密碼")]
 		public required string Password { get; set; }
 	}
+
+	public class CheckSmsDto
+	{
+		[Required(ErrorMessage = "請填入{0}")]
+		[Display(Name = "帳號")]
+		public required string Account { get; set; }
+
+		[Required(ErrorMessage = "請填入{0}")]
+		[Display(Name = "密碼")]
+		public required string Password { get; set; }
+
+
+		[Required(ErrorMessage = "請填入{0}")]
+		[Display(Name = "手機驗證碼")]
+		public required string SmsCode { get; set; }
+	}
 }

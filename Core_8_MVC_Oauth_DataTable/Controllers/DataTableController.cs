@@ -24,7 +24,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 		{
 
 			// 查詢數據的初步集合
-			var query = _db.logger.AsQueryable();
+			var query = _db.Logger.AsQueryable();
 
 			// 處理全局搜尋
 			if (!string.IsNullOrEmpty(request.Search?.Value))

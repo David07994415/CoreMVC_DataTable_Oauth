@@ -6,16 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core_8_MVC_Oauth_DataTable.Models;
 
-public partial class Logger
+public partial class MemberShip
 {
     [Key]
-    public int Id { get; set; }
+    public int SN { get; set; }
 
     [StringLength(50)]
-    public string UserName { get; set; } = null!;
+    public string Phone { get; set; } = null!;
 
     [StringLength(50)]
-    public string UrlPath { get; set; } = null!;
-
-    public DateTime LogTime { get; set; }
+    public string Pid { get; set; } = null!;
 }

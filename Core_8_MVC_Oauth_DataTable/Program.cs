@@ -28,44 +28,42 @@ namespace Core_8_MVC_Oauth_DataTable
 			// }
 
 
-
-
-
 			var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
 			builder.Services.AddControllersWithViews();
-
 			builder.Services.AddDbContext<coredbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("coreDbConString")));
-
-			// 註冊 IHttpClientFactory
-			builder.Services.AddHttpClient();
+			// builder.Services.AddHttpClient();  // 註冊 IHttpClientFactory
 
 			// 加入驗證模式 (Cookie 和 第三方登入)
 			builder.Services.AddAuthentication(options =>
 			{
 				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-				//options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+				// options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 			})
 			.AddCookie(options =>
 			{
-				options.Cookie.SameSite = SameSiteMode.None;  // 允許跨站請求的 Cookie
+				options.Cookie.SameSite = SameSiteMode.Lax;  // 允許跨站請求的 Cookie
 				options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // 僅適用於 HTTPS
+				options.LoginPath = "/Login/Index";				// 登入路徑
+				options.LogoutPath = "/Login/Index";			// 登出路徑
+				options.AccessDeniedPath = "/Login/Index"; 
+				options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+				options.SlidingExpiration = true;
+
 			})
 			.AddGoogle(options =>
 			{
-				options.ClientId = builder.Configuration.GetSection("GoogleOAuth:CredentialId").Value;                //"Your-Google-Client-Id";
-				options.ClientSecret = builder.Configuration.GetSection("GoogleOAuth:CredentialSecret").Value;  //"Your-Google-Client-Secret";
-																												// options.CallbackPath = "//signin-google/SigninGoogle";  // google console 的 callback 網址
-				options.CallbackPath = "/signin-google";
+				options.ClientId = builder.Configuration.GetSection("GoogleOAuth:CredentialId").Value!;                //"Your-Google-Client-Id";
+				options.ClientSecret = builder.Configuration.GetSection("GoogleOAuth:CredentialSecret").Value!;  //"Your-Google-Client-Secret";
+				options.CallbackPath = "/signin-google";  // google console 的 callback 網址
 
 			})
 			.AddOAuth("Line", options =>
 			{
-				options.ClientId = builder.Configuration["LineOAuth:CredentialId"];
-				options.ClientSecret = builder.Configuration["LineOAuth:CredentialSecret"];
-				options.CallbackPath = new PathString("/signin-line");  // Line 回調路徑
+				options.ClientId = builder.Configuration["LineOAuth:CredentialId"]!;
+				options.ClientSecret = builder.Configuration["LineOAuth:CredentialSecret"]!;
+				options.CallbackPath = new PathString("/signin-line");  // Line Dev 的 callback 網址
 				options.AuthorizationEndpoint = "https://access.line.me/oauth2/v2.1/authorize";
 				options.TokenEndpoint = "https://api.line.me/oauth2/v2.1/token";
 				options.UserInformationEndpoint = "https://api.line.me/v2/profile";
@@ -137,10 +135,15 @@ namespace Core_8_MVC_Oauth_DataTable
 						await Task.CompletedTask;
 					}
 				};
-
-
-
 			});
+
+
+			// 加入特定的 Roles
+			builder.Services.AddAuthorizationBuilder()
+										// 加入特定的 Roles
+										.AddPolicy("特定的roles", policy => policy.RequireRole("roleName"));
+
+
 
 
 			var app = builder.Build();

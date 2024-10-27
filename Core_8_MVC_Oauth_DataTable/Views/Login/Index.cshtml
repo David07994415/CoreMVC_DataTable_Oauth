@@ -12,26 +12,75 @@
 	<li>5. LoginController.cs：新增 Redirect 和 Callback Action</li>
 </ul>
 
+
+<h3>訊息列表</h3>
+@if (ViewBag.Message != null)
+{
+	<p>@ViewBag.Message</p>
+}
+
+
+
+
 <form asp-action="Login" asp-controller="Login" method="post">
 
 	@Html.AntiForgeryToken()
 
 	<div>
 		<label for="Account">帳號：</label>
-		<input type="text" name="Account" placeholder="請填入帳號" />
+		<input type="text" name="Account" placeholder="請填入帳號" value='@(ViewBag.Account ??"")' />
 	</div>
+	@*
+	@ViewBag.Account??''
+	@ViewBag.Account??'' *@
 
 	<div>
 		<label for="Password">密碼：</label>
-		<input type="password" name="Password" placeholder="請填入密碼" />
+		<input type="password" name="Password" placeholder="請填入密碼" value="@(ViewBag.Password ??"")" />
 	</div>
 
-	<button type="submit">登入</button>
+	<button type="submit" asp-action="Login" asp-controller="Login">登入</button>
 
 </form>
 
-<div>
-<h3>第三方登入</h3>  
-	<a asp-action="OAuthSignIn" asp-controller="Login" asp-route-path="GoogleResponse">Google 登入</a>
-	<a asp-action="OAuthSignIn" asp-controller="Login" asp-route-path="LineResponse">Line 登入</a>
-</div>
+
+
+@if (ViewBag.VerifySmsPhone != null)
+{
+	if (ViewBag.VerifySmsPhone == true)
+	{
+		<form asp-action="CheckSmsPhone" asp-controller="Login" method="post">
+
+			@Html.AntiForgeryToken()
+
+			<!-- 隱藏帳號和密碼 -->
+			<input type="hidden" name="Account" value="@Context.Request.Form["Account"]" />
+			<input type="hidden" name="Password" value="@Context.Request.Form["Password"]" />
+
+			<div>
+				<label for="">驗證碼：</label>
+				<input type="text" name="SmsCode" placeholder="請填入驗證碼" />
+			</div>
+
+			<button type="submit">送出驗證碼</button>
+
+		</form>
+	}
+}
+
+
+@if (ViewBag.VerifySmsPhone != null)
+{
+
+	@if (ViewBag.ThreePartyLogin == true)
+	{
+		<div>
+			<h3>第三方登入</h3>
+			<a asp-action="OAuthSignIn" asp-controller="Login" asp-route-path="GoogleResponse">Google 登入</a>
+			<a asp-action="OAuthSignIn" asp-controller="Login" asp-route-path="LineResponse">Line 登入</a>
+		</div>
+	}
+
+}
+
+
