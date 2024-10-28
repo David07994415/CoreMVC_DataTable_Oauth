@@ -1,0 +1,21 @@
+﻿
+
+<h2>Google CSE</h2>
+<p>1. 先前往：https://programmablesearchengine.google.com/ 建立一個 CSE 服務</p>
+<p>2. 可以取得相關 ID </p>
+<p>3. 重新導向到cse.google</p>
+
+
+
+<p>這是可以內嵌網頁的搜尋框</p>
+<script async src="https://cse.google.com/cse.js?cx=yourID"></script>
+<div class="gcse-search"></div>
+
+
+<br>
+<p>或者，可以透過form，傳送給後端controller</p>
+<form asp-action="redirect" asp-controller="GoogleCSE" method="post">
+	<input name="search" >
+
+	<button type="submit">搜尋</button>
+</form>
