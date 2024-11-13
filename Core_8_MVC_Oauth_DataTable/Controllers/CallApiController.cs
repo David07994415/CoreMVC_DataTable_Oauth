@@ -26,10 +26,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 			return View();
 		}
 
-		public IActionResult CallApi() 
-		{
-		
-		}
+
 
 		[NonAction]
 		public async Task<IActionResult> SendSms(string MobileNumber, string RandomNumber,string EncodePid)

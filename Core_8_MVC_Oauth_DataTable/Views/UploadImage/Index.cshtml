@@ -1,0 +1,80 @@
+﻿
+
+
+<div>
+	<input type="file" id="Input_Files" multiple>
+	<button id="Upload_Btn">Upload Image</button>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+
+
+    $(document).ready(function () {
+
+        console.log("Loading")
+        $('#Upload_Btn').click(function () {
+
+            let formData = new FormData();
+            console.log($('#Input_Files'))
+            console.log(document.getElementById('Input_Files'))
+            console.log(document.getElementById('Input_Files').files)
+            console.log(document.getElementById('Input_Files').files.length)
+
+            let files = $('#Input_Files')[0].files; // $('#fileinput').prop('files');
+
+
+            // 檢查是否有選擇檔案
+            if (files.length === 0) {
+                alert("請選擇至少一個檔案");
+                return;
+            }
+
+            // 加入每個檔案到 formData
+            for (var i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            // 上傳檔案 function
+           UploadImageFunction(formData)
+
+        });
+
+
+        function UploadImageFunction(formData) {
+            formData.append('id',"test");
+
+
+
+            console.log(formData)
+
+            // 使用 for...of 列印每個項目
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            // 或使用
+            console.log(formData.getAll('id'));
+
+            $.ajax({
+                url: '/UploadImage/Upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                success: function (response) {
+                    alert(response.message);
+                },
+                error: function (error) {
+                    alert("上傳失敗");
+                }
+            });
+        
+        }
+
+
+    });
+
+</script>
