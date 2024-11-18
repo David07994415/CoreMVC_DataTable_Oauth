@@ -1,3 +1,4 @@
+using Core_8_MVC_Oauth_DataTable.Filter;
 using Core_8_MVC_Oauth_DataTable.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -33,6 +34,8 @@ namespace Core_8_MVC_Oauth_DataTable
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddDbContext<coredbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("coreDbConString")));
 			builder.Services.AddHttpClient();  // 註冊 IHttpClientFactory
+			builder.Services.AddScoped<CheckHaveOauthFilter>(); // 注入 Filter 服務
+
 
 			// 加入驗證模式 (Cookie 和 第三方登入)
 			builder.Services.AddAuthentication(options =>
