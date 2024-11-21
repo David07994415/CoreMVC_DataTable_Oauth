@@ -1,0 +1,68 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<h1>Map Controller and JS</h1>
+
+
+
+<script>
+
+    // MULTIPOLYGON (((lng1 lat1, lng2 lat2, ..., lng1 ==>  WKT（Well-Known Text）格式
+    // MULTIPOLYGON 轉換為 Array，Leaflet 支持 Array 格式 [[[]]]
+
+        function parseMultiPolygon(multiPolygonStr) {
+        // 移除 `MULTIPOLYGON` 和括號
+        const cleaned = multiPolygonStr.replace('MULTIPOLYGON (((', '').replace(')))', '');
+
+        // 按外圈與內圈進行分割
+        const polygons = cleaned.split(')),((').map(polygon => {
+            // 按逗號分割點
+            const points = polygon.split(',').map(point => {
+                // 分割緯度與經度，並轉換為數字
+                const [lng, lat] = point.trim().split(' ').map(Number);
+                return [lat, lng]; // Leaflet 使用 [lat, lng]
+            });
+            return points; // 返回多邊形
+        });
+
+        return polygons;
+    }
+
+    // 測試
+    const multiPolygonStr = 'MULTIPOLYGON (((120.13 21.33, 120.14 21.34, 120.15 21.35, 120.13 21.33)))';
+    const polygons = parseMultiPolygon(multiPolygonStr);
+    console.log(polygons);
+    // Output: [[[21.33, 120.13], [21.34, 120.14], [21.35, 120.15], [21.33, 120.13]]]
+
+
+    // // 在 Leaflet 中加載 MULTIPOLYGON：可使用 L.polygon or  L.geoJSON (<==較複雜的)
+    // // L.polygon Way
+    // const map = L.map('map').setView([21.33, 120.13], 13);
+    // // 添加底圖
+    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // // 加載多邊形
+    // const polygons = parseMultiPolygon(multiPolygonStr);
+    // polygons.forEach(polygon => {
+    //     L.polygon(polygon, { color: 'blue' }).addTo(map);
+    // });
+    // // L.polygon Way
+
+    // // L.geoJSON Way
+    // function convertToGeoJSON(multiPolygonStr) {
+    //     const coordinates = parseMultiPolygon(multiPolygonStr).map(polygon => [polygon]);
+    //     return {
+    //         type: "Feature",
+    //         geometry: {
+    //             type: "MultiPolygon",
+    //             coordinates: coordinates
+    //         }
+    //     };
+    // }
+    // const geoJSON = convertToGeoJSON(multiPolygonStr);
+    // L.geoJSON(geoJSON, { style: { color: 'green' } }).addTo(map);
+    // // L.geoJSON Way
+
+</script>
