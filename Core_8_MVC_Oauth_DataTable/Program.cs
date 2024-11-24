@@ -1,4 +1,5 @@
 using Core_8_MVC_Oauth_DataTable.Filter;
+using Core_8_MVC_Oauth_DataTable.MiddleWare;
 using Core_8_MVC_Oauth_DataTable.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -151,8 +152,12 @@ namespace Core_8_MVC_Oauth_DataTable
 
 			var app = builder.Build();
 
-			// Configure the HTTP request pipeline.
-			if (!app.Environment.IsDevelopment())
+            // 在此註冊自定義中介軟體
+            app.UseMiddleware<ClientHintsMiddleware>();
+
+
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
 			{
 				app.UseExceptionHandler("/Home/Error");
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
