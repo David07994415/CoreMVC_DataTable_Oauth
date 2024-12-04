@@ -1,0 +1,84 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<h2>Set Cookie Controller</h2>
+
+
+<button onclick="setMultipleItemsInCookie()">Set Multiple Items in Cookie</button>
+<button onclick="getSpecificCookieData()">Get UserData Cookie</button>
+
+<button onclick="setMultipleItemsInLocalStorage()">Set Multiple Items in localStorage</button>
+<button onclick="getSpecificLocalStorageData()">Get UserData from localStorage</button>
+
+<script>
+    // 設置多個項目為一個 Cookie
+    function setMultipleItemsInCookie() {
+        var userData = {
+            UserId: "2",
+            UserName: "JohnDoe"
+        };
+
+        // 將數據轉換為 JSON 字符串
+        var jsonData = JSON.stringify(userData);
+
+        // 設置 Cookie，將 JSON 字符串存儲
+        document.cookie = "UserData=" + encodeURIComponent(jsonData) + "; expires=" + new Date(Date.now() + 3600000).toUTCString() + "; path=/";
+        alert("Multiple items have been stored in one cookie!");
+    }
+
+    // 只讀取名為 UserData 的 Cookie
+    function getSpecificCookieData() {
+        // 讀取 UserData Cookie
+        var cookieName = "UserData=";
+        var cookies = document.cookie.split("; ");
+        var userDataCookie = null;
+
+        cookies.forEach(function(cookie) {
+            if (cookie.indexOf(cookieName) === 0) {
+                userDataCookie = cookie.substring(cookieName.length, cookie.length);
+            }
+        });
+
+        if (userDataCookie) {
+            // 解碼並解析 JSON 字符串
+            var userData = JSON.parse(decodeURIComponent(userDataCookie));
+            alert("UserId: " + userData.UserId + "\nUserName: " + userData.UserName);
+        } else {
+            alert("No UserData cookie found.");
+        }
+    }
+</script>
+
+<script>
+    // 設置多個項目為一個 localStorage
+    function setMultipleItemsInLocalStorage() {
+        var userData = {
+            UserId: "2",
+            UserName: "JohnDoe"
+        };
+
+        // 將數據轉換為 JSON 字符串
+        var jsonData = JSON.stringify(userData);
+
+        // 設置 localStorage，將 JSON 字符串存儲
+        localStorage.setItem("UserData", jsonData);
+        alert("Multiple items have been stored in localStorage!");
+    }
+
+    // 只讀取名為 UserData 的 localStorage
+    function getSpecificLocalStorageData() {
+        // 從 localStorage 讀取 UserData
+        var userData = localStorage.getItem("UserData");
+
+        if (userData) {
+            // 解碼並解析 JSON 字符串
+            var parsedData = JSON.parse(userData);
+            alert("UserId: " + parsedData.UserId + "\nUserName: " + parsedData.UserName);
+        } else {
+            alert("No UserData found in localStorage.");
+        }
+    }
+</script>
