@@ -20,3 +20,10 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+.backgroundImgUrl {
+    background: url('') no-repeat center center;
+    background-image: url('../uploads/folder/subfolder/img1.png');
+    background-size: cover; /* 讓背景圖片覆蓋整個容器 */
+}
