@@ -154,6 +154,7 @@ namespace Core_8_MVC_Oauth_DataTable
 
             // 在此註冊自定義中介軟體
             app.UseMiddleware<ClientHintsMiddleware>();
+            app.UseMiddleware<RemoveServerHeaderMiddleware>();
 
 
             // Configure the HTTP request pipeline.
