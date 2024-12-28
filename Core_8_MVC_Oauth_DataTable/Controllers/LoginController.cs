@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Core_8_MVC_Oauth_DataTable.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Core_8_MVC_Oauth_DataTable.Controllers
 {
@@ -93,7 +94,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 				return View("Index");
 			}
 
-			if (OAuthData_Check.IsExpired==true)
+			if (OAuthData_Check.IsExpired == true)
 			{
 				ViewBag.Message = "會員已經過期，請與管理人員聯絡";
 				return View("Index");
@@ -105,7 +106,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 				ViewBag.VerifySmsPhone = true;
 				return View("Index");
 			}
-			else if(OAuthData_Check.IsPhoneVerify == true)  // 如果已經驗證過了，可以進行第三方登入
+			else if (OAuthData_Check.IsPhoneVerify == true)  // 如果已經驗證過了，可以進行第三方登入
 			{
 				ViewBag.Message = "請進行第三方登入";
 				ViewBag.ThreePartyLogin = true;
@@ -151,7 +152,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 
 			// 第三方資料表驗證，查看是否存在
 			var OAuthData = _db.OAuthTable.Where(x => x.MemberShIpSn == memberShip_Sn).FirstOrDefault();
-			if (OAuthData == null) 
+			if (OAuthData == null)
 			{
 				ViewBag.Message = "請重新登入";
 				return View("Index");
@@ -187,7 +188,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 				ViewBag.ThreePartyLogin = true;
 				return View("Index");
 			}
-			else 
+			else
 			{
 				ViewBag.VerifySmsPhone = true;
 				ViewBag.Message = "驗證碼輸入錯誤，請重新輸入";
@@ -284,8 +285,8 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 		//		{
 		//			new Claim(ClaimTypes.Name, user.Username),
 		//			new Claim(ClaimTypes.Role, "UserRole"), // 可以根據用戶的角色進行調整
-  //                  // 其他需要的 claims
-  //              };
+		//                  // 其他需要的 claims
+		//              };
 
 		//var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 		//var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
@@ -367,6 +368,86 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 
 		//	return RedirectToAction("Index", "Home");
 		//}
+
+
+
+		public async Task LogoutBtn() 
+		{
+			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+		}
+		public async Task<ActionResult> UserALogin()
+		{
+			// 建立 Claims
+			var claims = new List<Claim>
+			{
+				new Claim(ClaimTypes.Name, "UserA"),
+				new Claim(ClaimTypes.Role, "A"), // 可以根據用戶的角色進行調整
+			     // 其他需要的 claims
+			};
+
+			var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+			var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+			// 登入並生成 Cookie
+			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+			return RedirectToAction("UserALoginDone");
+		}
+
+
+		public async Task<ActionResult> UserBLogin()
+		{
+			// 建立 Claims
+			var claims = new List<Claim>
+			{
+				new Claim(ClaimTypes.Name, "UserB"),
+				new Claim(ClaimTypes.Role, "B"), // 可以根據用戶的角色進行調整
+			     // 其他需要的 claims
+			};
+
+			var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+			var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+			// 登入並生成 Cookie
+			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+			return RedirectToAction("UserBLoginDone");
+		}
+
+
+		[Authorize(Roles = "A")]
+		public async Task<ActionResult> UserALoginDone()
+		{
+			var UserIdentity = HttpContext.User.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).FirstOrDefault();
+
+			if (UserIdentity == null)
+			{
+				ViewBag.UserType = "沒有資料";
+			}
+			else 
+			{
+				ViewBag.UserType = UserIdentity;
+			}
+
+			return View();
+		}
+
+		[Authorize(Roles = "B")]
+		public async Task<ActionResult> UserBLoginDone()
+		{
+			var UserIdentity = HttpContext.User.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).FirstOrDefault();
+
+			if (UserIdentity == null)
+			{
+				ViewBag.UserType = "沒有資料";
+			}
+			else
+			{
+				ViewBag.UserType = UserIdentity;
+			}
+
+			return View();
+		}
 
 
 

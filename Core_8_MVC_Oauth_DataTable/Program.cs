@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
@@ -44,18 +45,145 @@ namespace Core_8_MVC_Oauth_DataTable
 				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				// options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+				options.DefaultForbidScheme = CookieAuthenticationDefaults.AuthenticationScheme;  // 添加這一行，指定 ForbidScheme
+				options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme; // 設置 DefaultChallengeScheme
 			})
 			.AddCookie(options =>
 			{
 				options.Cookie.SameSite = SameSiteMode.Lax;  // 允許跨站請求的 Cookie
 				options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // 僅適用於 HTTPS
-				options.LoginPath = "/Login/Index";				// 登入路徑
-				options.LogoutPath = "/Login/Index";			// 登出路徑
-				options.AccessDeniedPath = "/Login/Index"; 
-				options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-				options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                options.SlidingExpiration = true;
 
-			})
+                // 基本配置，這些是通用的配置
+                options.LoginPath = "/Home/Privacy";				// 登入路徑
+				options.LogoutPath = "/Home/Privacy";			// 登出路徑
+				options.AccessDeniedPath = "/Home/Privacy";
+
+
+                // 自定義基於角色的路徑
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    var roles = context.HttpContext.User?.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+
+					// 根據當前的請求路徑決定重定向的頁面
+					var currentPath = context.HttpContext.Request.Path.Value;
+
+					if (roles == null || !roles.Any()) // 沒有角色的情況，登錄跳轉
+					{
+						Console.WriteLine("OnRedirectToLogin,null");
+						//context.Response.Redirect("/Home/Privacy");
+
+						//context.Response.Redirect("/Home/Privacy");
+						Console.WriteLine("OnRedirectToAccessDenied,null");
+
+						if (currentPath == null)
+						{
+							context.Response.Redirect("/Home/Privacy");
+						}
+						// 這裡你可以根據路徑來進行不同的處理
+						if (currentPath.Contains("/UserALoginDone"))
+						{
+							// 如果是訪問 Admin 頁面，重定向到管理員拒絕頁面
+							context.Response.Redirect("/Login");
+						}
+						else if (currentPath.Contains("/UserBLoginDone"))
+						{
+							// 如果是訪問用戶頁面，重定向到用戶拒絕頁面
+							context.Response.Redirect("/Home");
+						}
+						else
+						{
+							// 默認的拒絕頁面
+							context.Response.Redirect("/Home/Privacy");
+						}
+					}
+					else if (roles.Contains("A"))
+					{
+						// 如果用戶的角色是 "A"，則導向到不同的登入路徑
+						context.Response.Redirect("/Login");
+					}
+					else if (roles.Contains("B"))
+					{
+						// 如果用戶的角色是 "B"，則導向到不同的登入路徑
+						context.Response.Redirect("/Home");
+					}
+					else
+					{
+						Console.WriteLine("OnRedirectToLogin,else");
+						// 其他情況，使用預設的登入頁面
+						context.Response.Redirect("/Home/Privacy");
+					}
+
+					return Task.CompletedTask;
+				};
+
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    var roles = context.HttpContext.User?.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+
+					// 根據當前的請求路徑決定重定向的頁面
+					var currentPath = context.HttpContext.Request.Path.Value;
+
+					if (roles == null || !roles.Any()) // 沒有角色的情況，登錄跳轉
+					{
+						//context.Response.Redirect("/Home/Privacy");
+						Console.WriteLine("OnRedirectToAccessDenied,null");
+
+						if (currentPath == null)
+						{
+							context.Response.Redirect("/Home/Privacy");
+						}
+						// 這裡你可以根據路徑來進行不同的處理
+						if (currentPath.Contains("/UserALoginDone"))
+						{
+							// 如果是訪問 Admin 頁面，重定向到管理員拒絕頁面
+							context.Response.Redirect("/Login");
+						}
+						else if (currentPath.Contains("/UserBLoginDone"))
+						{
+							// 如果是訪問用戶頁面，重定向到用戶拒絕頁面
+							context.Response.Redirect("/Home");
+						}
+						else
+						{
+							// 默認的拒絕頁面
+							context.Response.Redirect("/Home/Privacy");
+						}
+
+
+
+					}
+					else if (roles.Contains("A"))
+					{
+						// 如果用戶的角色是 "A"，則導向到不同的登入路徑
+						context.Response.Redirect("/Login");
+					}
+					else if (roles.Contains("B"))
+					{
+						// 如果用戶的角色是 "B"，則導向到不同的登入路徑
+						context.Response.Redirect("/Home");
+					}
+					else
+					{
+
+						Console.WriteLine("OnRedirectToAccessDenied,else");
+						// 其他情況，使用預設的登入頁面
+						context.Response.Redirect("/Home/Privacy");
+					}
+
+					return Task.CompletedTask;
+				};
+
+
+
+            })
 			.AddGoogle(options =>
 			{
 				options.ClientId = builder.Configuration.GetSection("GoogleOAuth:CredentialId").Value!;                //"Your-Google-Client-Id";
@@ -143,10 +271,16 @@ namespace Core_8_MVC_Oauth_DataTable
 
 
 			// 加入特定的 Roles
-			builder.Services.AddAuthorizationBuilder()
-										// 加入特定的 Roles
-										.AddPolicy("特定的roles", policy => policy.RequireRole("roleName"));
+			//builder.Services.AddAuthorizationBuilder()
+			//							// 加入特定的 Roles
+			//							.AddPolicy("特定的roles", policy => policy.RequireRole("roleName"));
 
+			//builder.Services.AddAuthorization(options =>
+			//{
+			//	// 設置基於角色的授權策略
+			//	options.AddPolicy("RoleA", policy => policy.RequireRole("A"));
+			//	options.AddPolicy("RoleB", policy => policy.RequireRole("B"));
+			//});
 
 
 
