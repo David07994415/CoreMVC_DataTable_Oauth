@@ -204,6 +204,8 @@ namespace Core_8_MVC_Oauth_DataTable
 				options.Scope.Add("openid");
 				options.Scope.Add("email");
 
+
+
 				options.SaveTokens = true;
 
 				options.Events = new OAuthEvents

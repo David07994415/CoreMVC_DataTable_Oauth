@@ -12,6 +12,7 @@ using Core_8_MVC_Oauth_DataTable.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Core_8_MVC_Oauth_DataTable.Controllers
 {
@@ -20,17 +21,20 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 
 		// private readonly IHttpClientFactory _httpClientFactory;
 		private readonly IConfiguration _configuration;
+		private readonly HttpClient _httpClient;
 		private readonly coredbContext _db;
 
 
 		public LoginController(
 			//IHttpClientFactory httpClientFactory,
 			IConfiguration configuration,
-			coredbContext db)
+			coredbContext db,
+			HttpClient httpClient)
 		{
 			// _httpClientFactory = httpClientFactory;
 			_configuration = configuration;
 			_db = db;
+			_httpClient = httpClient;
 		}
 		public IActionResult Index()
 		{
@@ -216,9 +220,34 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 			}
 			else if (path == "LineResponse")
 			{
-				var redirectUrl = Url.Action("LineResponse", "Login");  // LineResponse  LineResponse_Check
-				var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-				return Challenge(properties, "Line");
+
+				// 判斷設備是否為手機，進而決定是否使用 Line App 的 Deep Link
+				var isMobile = Request.Headers["User-Agent"].ToString().Contains("Mobile");
+				string lineOAuthUrl;
+
+				if (isMobile)
+				{
+					string clientId = _configuration["LineOAuth:CredentialId"];
+					string redirectUri = Url.Action("LineResponseMobile", "Login", null, Request.Scheme);
+					string state = Guid.NewGuid().ToString();
+					string scope = "openid profile email";
+
+
+
+					// 手機設備使用 Line App 的 Deep Link
+					lineOAuthUrl = $"line://oauth2/authorize?response_type=code" +
+								   $"&client_id={clientId}" +
+								   $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+								   $"&state={state}" +
+								   $"&scope={scope}";
+					return Redirect(lineOAuthUrl); // 直接重定向到 Line App
+				}
+				else
+				{
+					var redirectUrl = Url.Action("LineResponse", "Login");  // LineResponse  LineResponse_Check
+					var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+					return Challenge(properties, "Line");
+				}
 			}
 
 			return RedirectToAction("Index");
@@ -275,6 +304,83 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
+
+		// deep link ：需要製作一個view
+		[HttpGet]
+		public async Task<IActionResult> LineResponseMobile(string code, string state)
+		{
+			if (string.IsNullOrEmpty(code))
+			{
+				return RedirectToAction("Index");
+			}
+
+			// Step 1: 使用授權碼交換 Access Token
+			string clientId = _configuration["LineOAuth:CredentialId"];
+			string clientSecret = _configuration["LineOAuth:CredentialSecret"];
+			string redirectUri = Url.Action("LineResponse", "Login", null, Request.Scheme);
+
+			var tokenRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.line.me/oauth2/v2.1/token");
+			var tokenRequestContent = new FormUrlEncodedContent(new Dictionary<string, string>
+	{
+		{ "grant_type", "authorization_code" },
+		{ "code", code },
+		{ "redirect_uri", Uri.EscapeDataString(redirectUri) },
+		{ "client_id", clientId },
+		{ "client_secret", clientSecret }
+	});
+
+			tokenRequest.Content = tokenRequestContent;
+			var tokenResponse = await _httpClient.SendAsync(tokenRequest);
+
+			if (!tokenResponse.IsSuccessStatusCode)
+			{
+				return RedirectToAction("Index");
+			}
+
+			// 解析 Access Token
+			var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
+			var tokenData = JsonDocument.Parse(tokenResponseContent);
+			string accessToken = tokenData.RootElement.GetProperty("access_token").GetString();
+
+			// Step 2: 使用 Access Token 獲取用戶資料
+			var userRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.line.me/v2/profile");
+			userRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+			var userResponse = await _httpClient.SendAsync(userRequest);
+
+			if (!userResponse.IsSuccessStatusCode)
+			{
+				return RedirectToAction("Index");
+			}
+
+			var userResponseContent = await userResponse.Content.ReadAsStringAsync();
+			var userData = JsonDocument.Parse(userResponseContent);
+			string userId = userData.RootElement.GetProperty("userId").GetString();
+			string displayName = userData.RootElement.GetProperty("displayName").GetString();
+			string email = userData.RootElement.GetProperty("email").GetString();
+
+			// Step 3: 註冊或登入邏輯
+			// 這裡可以使用 userId 和 email 確認用戶資料
+			var dbContext = ...; // 獲取資料庫上下文
+			var existingUser = await dbContext.Users.FirstOrDefaultAsync(u => u.LineUserId == userId);
+			if (existingUser == null)
+			{
+				// 創建新用戶或進行其他處理
+			}
+
+			// Step 4: 進行認證或其他處理
+			var claims = new List<Claim>
+	{
+		new Claim(ClaimTypes.NameIdentifier, userId),
+		new Claim(ClaimTypes.Name, displayName),
+		new Claim(ClaimTypes.Email, email)
+	};
+
+			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+			var principal = new ClaimsPrincipal(identity);
+			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+			return RedirectToAction("Index", "Home");
+		}
 
 
 		//[Authorize(Policy = "特定的roles")]
@@ -371,7 +477,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 
 
 
-		public async Task LogoutBtn() 
+		public async Task LogoutBtn()
 		{
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 		}
@@ -424,7 +530,7 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 			{
 				ViewBag.UserType = "沒有資料";
 			}
-			else 
+			else
 			{
 				ViewBag.UserType = UserIdentity;
 			}
