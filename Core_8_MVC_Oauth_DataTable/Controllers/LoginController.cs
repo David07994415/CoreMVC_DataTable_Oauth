@@ -358,26 +358,26 @@ namespace Core_8_MVC_Oauth_DataTable.Controllers
 			string displayName = userData.RootElement.GetProperty("displayName").GetString();
 			string email = userData.RootElement.GetProperty("email").GetString();
 
-			// Step 3: 註冊或登入邏輯
-			// 這裡可以使用 userId 和 email 確認用戶資料
-			var dbContext = ...; // 獲取資料庫上下文
-			var existingUser = await dbContext.Users.FirstOrDefaultAsync(u => u.LineUserId == userId);
-			if (existingUser == null)
-			{
-				// 創建新用戶或進行其他處理
-			}
+	//		// Step 3: 註冊或登入邏輯
+	//		// 這裡可以使用 userId 和 email 確認用戶資料
+	//		var dbContext = ...; // 獲取資料庫上下文
+	//		var existingUser = await dbContext.Users.FirstOrDefaultAsync(u => u.LineUserId == userId);
+	//		if (existingUser == null)
+	//		{
+	//			// 創建新用戶或進行其他處理
+	//		}
 
-			// Step 4: 進行認證或其他處理
-			var claims = new List<Claim>
-	{
-		new Claim(ClaimTypes.NameIdentifier, userId),
-		new Claim(ClaimTypes.Name, displayName),
-		new Claim(ClaimTypes.Email, email)
-	};
+	//		// Step 4: 進行認證或其他處理
+	//		var claims = new List<Claim>
+	//{
+	//	new Claim(ClaimTypes.NameIdentifier, userId),
+	//	new Claim(ClaimTypes.Name, displayName),
+	//	new Claim(ClaimTypes.Email, email)
+	//};
 
-			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-			var principal = new ClaimsPrincipal(identity);
-			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+	//		var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+	//		var principal = new ClaimsPrincipal(identity);
+	//		await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
 			return RedirectToAction("Index", "Home");
 		}

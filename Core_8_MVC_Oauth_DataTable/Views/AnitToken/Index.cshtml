@@ -1,0 +1,63 @@
+﻿@model Core_8_MVC_Oauth_DataTable.Controllers.AnitTokenViewModel;
+
+<form method="post" asp-action="FormPost">
+	@* @Html.AntiForgeryToken() 會自動加載 *@
+	name：<input name="name" type="text" value="">
+	email：<input name="email" type="text" value="">
+	<button type="submit">送出form</button>
+</form>
+
+@Html.AntiForgeryToken()
+<button id="JquerySend">Jquery Post Form</button>
+
+@section Scripts {
+
+	<script type="text/javascript">
+		// https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-9.0
+
+		$(document).on(`click`, `#JquerySend`, function () {
+			let d = {}
+			d.name = $('input[name="name"]').val();
+			d.email = $(`input[name='email']`).val();
+			let token = $(`input[name="__RequestVerificationToken"]`).val();
+			console.log(d);
+
+			PostForm(d,token)
+		})
+
+
+
+
+		function PostForm(d,token) {
+			$.ajax({
+				type: `POST`,
+				url: `https://localhost:7240/AnitToken/FormPost_Ajax`,
+				data: d,
+				dataType: `json`,
+				headers: {
+					'RequestVerificationToken': token  // 把 token 加入請求的 headers 中
+				},
+				// beforeSend: function (xhr) {
+				// 	// Attach the anti-forgery token to the headers
+				// 	xhr.setRequestHeader('RequestVerificationToken', token); // Send the token in the headers
+				// },
+				success: function (result) {
+					console.log(result);
+					// if (result.status === `Success`) {
+					// } else {
+					// 	console.error(result.ErrorMsg);
+					// }
+				},
+				error: function (xhr, status, error) {
+					console.log(xhr);
+					console.log(status);
+					console.log(error);
+				}
+			});
+		}
+
+
+	</script>
+}
+
+
