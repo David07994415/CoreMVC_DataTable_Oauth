@@ -212,6 +212,9 @@ namespace Core_8_MVC_Oauth_DataTable
 				{
 					OnCreatingTicket = async context =>
 					{
+						// 這邊Log檢查是否有進來
+						// Ping 
+
 						// 檢查是否有正確的 Access Token
 						Console.WriteLine($"Access Token: {context.AccessToken}");
 
