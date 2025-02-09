@@ -316,6 +316,21 @@ namespace Core_8_MVC_Oauth_DataTable
 				name: "default",
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 
+
+			// 自訂處理 404 的邏輯
+			app.Use(async (context, next) =>
+			{
+				await next();
+
+				// 檢查回應狀態碼是否為 404
+				if (context.Response.StatusCode == 404)
+				{
+					// 將請求導向到首頁
+					context.Response.Redirect("/");
+				}
+			});
+
+
 			app.Run();
 		}
 	}

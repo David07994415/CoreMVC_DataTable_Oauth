@@ -1,0 +1,18 @@
+﻿@model Core_8_MVC_Oauth_DataTable.Controllers.AjaxIndexRenderViewModel;
+
+<h2>Ajax Page</h2>
+
+<div >
+    <label for="Area">行政區</label>
+    <select id="Area" asp-items="@Model.AreaList"></select>
+</div>
+
+<div>
+    <label for="Div">里別區</label>
+    <select id="Div"><option value="">請選擇</option></select>
+</div>
+
+
+@section Scripts {
+	<script src="~/js/ajaxpage.js" asp-append-version="true"></script>
+}
